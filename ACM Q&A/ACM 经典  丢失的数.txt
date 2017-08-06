@@ -1,0 +1,98 @@
+n个2进制数，输入n-1个数,输出缺失的一个数。
+
+
+输入
+4
+10 11 10
+
+输出
+00
+
+
+利用低位比较法，减少了将近1/3的运算量，值得借鉴
+
+
+
+源代码:
+
+
+#include <iostream>
+#include<vector>
+#include<string>
+#include<cmath>
+using namespace std;
+
+int  ppp = 0;
+
+struct character
+{
+	string Cstr;
+	int is;
+};
+
+void Solve(vector<character> &number,int length,int n)
+{
+	int count1 = 0,count0 = 0,key = 0;
+	
+	if(length < 0) return;                   //递归出口
+
+	for(int i = 0; i < n ; i++)
+	{
+		if(number[i].Cstr[length] == '1')
+		{
+			count1++;
+			number[i].is = 1;
+		   
+		}
+		else
+		{
+			count0++;
+			number[i].is = 0;
+			
+		}
+	}
+	if(count1 < count0)
+	{
+		vector<character> temp(count1);
+		for(int k = 0; k < n; k++)
+		{
+			if(number[k].is == 1)
+				temp[key++] = number[k];
+		}
+	    Solve(temp,length - 1, count1-1);
+		cout << '1';
+	}
+	else
+	{		
+	    vector<character> temp(count0);		
+		for(int k = 0; k < n; k++)
+		{
+			if(number[k].is == 0)
+				temp[key++] = number[k];
+		}	
+		Solve(temp,length - 1, count0-1);
+		cout << '0';
+	}
+	
+}
+
+int main()
+{
+    int n;
+	string end;
+	cin >> n;
+	vector<character> number(n); 
+	for(int i = 0; i < n - 1; i++)
+	{
+		cin >> number[i].Cstr;
+		if(number[i].Cstr.length() != (log10(n)/log10(2)))      //求log2(n);
+		{
+		    cout << "输入二进制数位数不对，请重输：";
+			i--;
+		}
+	}
+
+	Solve(number,number[0].Cstr.length()-1,n-1);
+	
+
+}

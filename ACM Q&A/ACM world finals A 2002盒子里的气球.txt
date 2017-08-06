@@ -1,0 +1,113 @@
+Problem 1515 Balloons in a Box
+Accept: 276    Submit: 1463
+Time Limit: 1000 mSec    Memory Limit : 32768 KB
+Problem Description
+
+You must write a program that simulates placing spherical balloons into a rectangular box.
+
+The simulation scenario is as follows. Imagine that you are given a rectangular box and a set of points inside the box. Each point represents a position where you might place a balloon. To place a balloon at a point, center it at the point and inflate the balloon until it touches a side of the box or a previously placed balloon. You may use the points in any order you like, and need not use every point. Your objective is to place balloons in the box in an order that maximizes the total volume occupied by the balloons.
+
+You are required to calculate the volume within the box that is not enclosed by the balloons.
+
+All integer will be in [-1000, 1000].
+Input
+
+The input consists of several test cases. The first line of each test case contains a single integer n that indicates the number of points in the set (n ¡Ü 6). The second line contains three integers that represent the (x, y, z) integer coordinates of a corner of the box, and the third line contains the (x, y, z) integer coordinates of the opposite corner of the box. The next n lines of the test case contain three integers each, representing the (x, y, z) coordinates of the points in the set. The box has non-zero length in each dimension and its sides are parallel to the coordinate axes.
+Output
+
+For each test case print one line which indicates the volume of the box not occupied by balloons. Round the volume to the nearest integer.
+Sample Input
+2 0 0 0 10 10 10 3 3 3 7 7 7
+Sample Output
+774 
+
+
+
+
+The source code£º
+
+
+
+
+#include<iostream>  
+#include<cmath>  
+#include<algorithm> 
+
+using namespace std;
+
+double x[2],y[2],z[2];  
+const double PI = 3.14;  //PI.
+
+struct point      //define struct to represent the coordinates of the points.
+{  
+	double x,y,z;    
+};  
+
+//judge the minimun distance between ballon and box's sides.  
+double side(point p)  
+{  
+	double minx = min(fabs(p.x-x[0]),fabs(p.x-x[1]));  
+	double miny = min(fabs(p.y-y[0]),fabs(p.y-y[1]));  
+	double minz = min(fabs(p.z-z[0]),fabs(p.z-z[1]));  
+	return min(minx,min(miny,minz));  
+}  
+
+//the formula of distance.
+double dis(point a,point b)  
+{  
+	return sqrt((a.x-b.x) * (a.x-b.x) + (a.y-b.y) * (a.y-b.y) + (a.z-b.z) * (a.z-b.z));  
+}  
+
+
+int main()  
+{  
+	int n;  
+	point a[6];  
+	int b[6] = {0,1,2,3,4,5};  
+	double v, r[6] , mind , s , ans; 
+	cin >> n;
+	while(n != 0)  
+	{  
+		ans = 0;  
+		for(int i = 0; i < 2; i++)                     //the coordinates of box's points.
+		{  
+			cin >> x[i] >> y[i] >> z[i];  
+		}  
+		for(int i = 0; i < n; i++)                     //variety of points' coordinates.
+		{  
+			cin >> a[i].x >> a[i].y >> a[i].z;  
+		}  
+		do  
+		{  
+			v = 0;  
+			memset(r, 0, sizeof(r));  
+			for(int i = 0; i < n; i++)  
+			{  
+				mind = side(a[i]);  
+				for(int j = 0; j < n; j++)  
+				{  
+					if(i == j || r[j] <= 0) continue;
+			
+					s = dis(a[i],a[j]) - r[j];
+					if(s < 0)  
+					{  
+						mind = 0;  
+						break;  
+					}  
+					if(mind > s)  
+						mind = s;  
+				}  
+				r[i] = mind;  
+				v += 4 / 3.0 * PI * mind * mind * mind;  
+			}  
+			if (v > ans)   
+				ans = v;  
+		}  
+		while(next_permutation( b , n+b ));            //Enumerate all kinds of situation to judge, choose the optimal solution  
+		printf("%.0lf\n",fabs((x[1]-x[0])*(y[1]-y[0])*(z[1]-z[0]))-ans);  
+
+		cin >> n;
+	}  
+	system("pause");  
+	return 0;  
+}  

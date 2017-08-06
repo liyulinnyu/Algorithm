@@ -1,0 +1,139 @@
+图书馆
+
+题目描述：
+     鲁滨逊决定在墙上做一个书架。把一些钉子钉入墙体，然后找来一些木板和水平的栓子，任意木板不在同一水平线上。现要放一本特别大的书，但由于书架结构问题，无法放入。决定改造书架。
+   改造方法如下：
+  （1）把架子留在原地不动
+  （2）把木板向左移或右移
+（3）吧木板锯掉一段向左移向右移
+（4）把栓子移到与原来位置同一水平线的另一个位置，并把木板左移或右移
+（5）把木板锯掉一段，移动某个栓子到水平线上的另一个位置，并把木板左移或右移
+（6）把木板和两个栓子一起拿掉
+当木板被两个栓子架住，并且木板的中心在两个栓子之间或恰好在一个栓子上方时，书架最稳定。一开始的书架都是最稳定的。木板的长度是整数，单位是英寸。只能做到以英寸为单位切割木板，改造中，书架必须始终是稳定的。
+    要求尽量减少移动栓子的数目，在这个前提下，找到浪费木板长度的最小方案。
+   木板厚度和栓子直径忽略不计。书只能竖直放置，全部厚度位于木板，而且只可以碰到其他木板或栓子边缘。
+
+
+
+
+程序不足处：
+    时间关系，没有考虑(5),(6)及放置书的板的移动情况，这几者都很容易实现，可参考已有程序。
+
+源程序：
+
+#include<iostream>  
+#include<cmath>  
+#include<algorithm> 
+#include<vector>
+
+using namespace std;
+
+double WallHeight;   //墙高
+double WallWidth;    //墙宽
+
+int BoardNum = 0;  //木板数量
+
+double BookHeight = 0; //书的高度
+
+struct BoardCharacter
+{
+	double length;           //木板长度
+	double x;
+	double y;              //起始坐标
+	bool canPush;          //是否可以放书
+};
+
+int main()
+{
+	cin >> WallHeight >> WallWidth;
+	while(BoardNum == 0)
+	{
+		cin >> BoardNum;
+		if(BoardNum >= WallHeight)     //木板数不能超过墙高
+			BoardNum = 0;
+	}
+
+	vector <BoardCharacter> boardTemp(BoardNum);         //动态数组保存总木板数量
+	vector <BoardCharacter> boardToBeUsed;      //保存筛选出的木板 
+
+	for(int i = 0; i < BoardNum ; i++)
+	{
+	    cout << "第" << i << "块木板的长度和起始坐标x,y : ";
+		boardTemp[i].canPush = false;                                //每个放数初始化为false
+		cin >> boardTemp[i].length >> boardTemp[i].x >> boardTemp[i].y;
+		if((boardTemp[i].x + boardTemp[i].length >= WallWidth) || (boardTemp[i].y >= WallHeight))
+		{
+		    i--;
+			cout << "木板长度或所在高度超过墙，请重新输入" << endl;
+			continue;
+		}
+		for(int j = 0; j < i ; j++)
+		{
+			if(boardTemp[j].y == boardTemp[i].y)
+			{
+			    i--;
+				cout << "在同一高度已经存在木板，请重新输入" << endl;
+				break;
+			}
+		}
+	}
+
+    cout << "输入书的高度:";
+	while(BookHeight == 0)
+	{
+		cin >> BookHeight;
+		if(BookHeight >= WallHeight)     //书高不能超过墙高
+			BoardNum = 0;
+	}
+
+	for(int i = 0; i < BoardNum; i++)
+	{
+		if(BookHeight + boardTemp[i].y < WallHeight)
+			boardTemp[i].canPush = true;
+	}
+
+	for(int i = 0; i < BoardNum; i++)
+	{
+		int j = 0,zulan = 0;
+		if(boardTemp[i].canPush == true)
+		{
+		    cout << "第" << i << "块木板可以放置书本" << endl;
+			for(;j < BoardNum; j++)
+			{
+			    if(i == j) continue;
+
+				if(boardTemp[j].y > boardTemp[i].y && (boardTemp[j].x < (boardTemp[i].x+boardTemp[i].length/2)
+					|| (boardTemp[j].x+boardTemp[j].length) > (boardTemp[i].x+boardTemp[i].length/2)))  //证明有阻拦
+				{
+					zulan = 1;
+					if((boardTemp[i].x+boardTemp[i].length/2) - boardTemp[j].x <= 
+						(WallWidth - (boardTemp[j].x+boardTemp[j].length)))
+					{
+					    cout << "可以将第" << j << "块木板向左或向右移动,消除阻拦" << endl;
+					}
+					else
+					{
+						if((boardTemp[i].x + boardTemp[i].length/2 - boardTemp[j].x) < (boardTemp[j].x+boardTemp[j].length) - 
+							(boardTemp[i].x + boardTemp[i].length/2))
+						{
+						    cout << "可以将第" << j << "块木板的左边锯下" <<
+								(boardTemp[i].x + boardTemp[i].length/2 - boardTemp[j].x) << "，可消除阻拦" << endl;
+						}
+						else
+							 cout << "可以将第" << j << "块木板的左边锯下" <<
+								(boardTemp[j].x+boardTemp[j].length) - (boardTemp[i].x + boardTemp[i].length/2) << 
+								"，可消除阻拦" << endl;
+					}
+				}
+
+			}
+		}
+		if(j == BoardNum && zulan == 0)
+			cout << "没有阻拦,第" << i << "块木板上放书是最优解" << endl << endl;
+		cout << endl;
+	}
+
+
+
+	return 0;
+}

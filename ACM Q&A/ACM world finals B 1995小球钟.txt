@@ -1,0 +1,205 @@
+问题描述：
+小球钟问题（百度）
+
+思路：
+三个栈，一个队列
+这次代码并没有完全实现，可能是在求解比较的时候有细节没有处理好，而且时间复杂度，我觉得也有些高了，建议修改。
+
+源代码：
+
+#include<iostream>
+#include<queue>
+#include<stack>
+#include<vector>
+using namespace std;
+
+
+#define MAXMINUTE 4
+#define MAXFIVEMINUTE 11
+#define MAXHOUR 11
+
+int FindGbs(int a,int b)
+{
+
+	int i;
+	if(a > b)                     //a>b  互换a b值
+	{
+		a = a + b;
+		b = a - b;
+		a = a - b;
+	}
+	for(i = b;i < a*b; i++)
+	{
+		if(i % a == 0 && i % b == 0)   //满足最小公倍数条件，输出 
+		{
+			return i;
+		}
+	}
+	return a*b;
+}
+
+
+int main()
+{
+	int number = 0;
+	cout << "输入小球个数(n>=30): ";
+	cin >> number;
+	while(number < 30)
+	{
+		cout << "重输： ";
+		cin >> number;
+	}
+	vector<int> AllDay(number);           //储存每个小球到的天数
+	vector<int> Ball(number);
+	queue<int> Track;
+	stack<int> Minute;
+	stack<int> FiveMinute;
+	stack<int> Hour;
+	int temp;  //储存临时的小球
+
+	for(int i = 0; i < number; i++)     //初始化球
+	{
+		Ball[i] = i+1;
+		Track.push(i+1);
+	}
+
+	int count = 0;
+	int finalnumber = 0;
+	while(1)
+	{
+		int Alltime = 0;
+		for(;Alltime < 1440; Alltime++)
+		{
+			if(Minute.empty() || Minute.size() < MAXMINUTE)        //栈是空或者没满
+			{
+				Minute.push(Track.front());                      //队首元素进入Minute栈
+				Track.pop();
+
+			}
+			else                                              //栈刚好有4个
+			{
+				while(!Minute.empty())
+				{
+					Track.push(Minute.top());               //Minute栈中元素进入Track队列
+					Minute.pop();
+				}
+
+
+				if(FiveMinute.empty() || FiveMinute.size() < MAXFIVEMINUTE)        //五分钟的栈是空或没满
+				{
+					FiveMinute.push(Track.front());
+					Track.pop();
+				}
+				else    //FiveMinute的栈刚好有11个了
+				{
+					while(!FiveMinute.empty())
+					{
+						Track.push(FiveMinute.top());
+						FiveMinute.pop();
+					}
+
+					if(Hour.empty() || Hour.size() < MAXHOUR)     //Hour的栈是空或没满
+					{
+						Hour.push(Track.front());
+						Track.pop();
+
+					}
+					else     //栈刚好有11个了
+					{
+						temp = Track.front();
+						Track.pop();
+						while(!Hour.empty())
+						{
+							Track.push(Hour.top());
+							Hour.pop();
+						}
+
+						Track.push(temp);                   //最后把寄存的小球存入栈
+					}
+				}
+			}
+
+		}
+		int delnumber = count;
+
+		int temproom[100];   //储存出栈的元素
+		int q = 0;
+		for(; q < count; q++)
+		{
+			temproom[q] = Track.front();
+			Track.pop();
+		}
+
+		if(Track.front() == Ball[count])
+		{
+			cout << Ball[count] << endl;
+			while(!Track.empty())
+				Track.pop();
+			while(!Minute.empty())
+				Minute.pop();
+			while(!FiveMinute.empty())
+				FiveMinute.pop();
+			while(!Hour.empty())
+				Hour.pop();
+			for(int i = 0; i < number; i++)     //初始化球
+			{
+				Track.push(i+1);
+			}
+
+			AllDay[count] = finalnumber;                     //记录每个小球的回归天数
+			count++;             //求编号+1
+			if(count == number)
+				break;                            //唯一出口
+
+
+
+			finalnumber = 0;      //天数归0
+			continue;
+			
+		}
+			
+		else
+		{
+			for(;q >= 0 ; q--)
+			{
+				Track.push(temproom[q]);
+			}
+			finalnumber++;
+			continue;
+		}
+
+
+
+
+	}
+	int k = 0;
+
+
+	cout << endl;
+	while(!Track.empty())
+	{
+		cout << Track.front() <<" ";
+		k++;
+		if(k % 5 == 0)
+			cout << endl;
+		Track.pop();
+	}
+
+/*
+    求最小公倍数，纠结啊
+*/
+
+
+	int mingbs = 0;           //最小公倍数
+	mingbs = FindGbs(AllDay[0],AllDay[1]);
+	for(int q = 2; q < number; q++)
+	{
+		cout << AllDay[q] << endl;
+		mingbs = FindGbs(mingbs,AllDay[q]);
+	}
+
+	cout << mingbs << endl;
+
+}
+
+
